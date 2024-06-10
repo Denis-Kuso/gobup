@@ -1,0 +1,8 @@
+# references, readings
+readings.md 
+
+TODO.txt
+bugs.md 
+
+# Test binary, built with `go test -c`
+*.test
