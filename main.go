@@ -20,10 +20,11 @@ func run(project string, out io.Writer) error {
 	if project == "" {
 		return fmt.Errorf("Project directory required: %w", ErrValidation)
 	}
-	const numStep int = 1
+	const numStep int = 2 // TODO refactor pipe building
 	pipe := make([]step, numStep)
 	pipe[0] = NewStep("go build", "go", []string{"build", ".", "errors"},
 		"go build: SUCCESS", project)
+	pipe[1] = NewStep("go test", "go", []string{"test", "-v"}, "go test: SUCCESS", project)
 
 	for _, s := range pipe {
 		msg, err := s.execute()

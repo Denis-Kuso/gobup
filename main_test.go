@@ -18,7 +18,7 @@ func TestRun(t *testing.T) {
 			name:    "succesful build",
 			project: "testdata/testingTool",
 			expErr:  nil,
-			expOut:  "go build: SUCCESS\n",
+			expOut:  "go build: SUCCESS\ngo test: SUCCESS\n",
 		},
 		{
 			name:    "failed build",
