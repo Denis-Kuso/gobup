@@ -1,11 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
-	"os/exec"
 	"os"
-	"flag"
+	"os/exec"
 )
 
 func main() {
@@ -17,10 +17,9 @@ func main() {
 	}
 }
 
-
 func run(project string, out io.Writer) error {
 	if project == "" {
-		return fmt.Errorf("no project name provided")
+		return fmt.Errorf("Project directory required: %w", ErrValidation)
 	}
 	const cmdName string = "go"
 	args := []string{"build", ".", "fmt"}
@@ -28,8 +27,8 @@ func run(project string, out io.Writer) error {
 	// assuming project a valid directory
 	cmd.Dir = project
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("'%s build' failed: %v", cmdName, err)
+		return &stepErr{step: "go build", msg: "go build failed", cause: err}
 	}
-	_, err := fmt.Fprintln(out, "Go Build: SUCCESS")
+	_, err := fmt.Fprintln(out, "go build: SUCCESS")
 	return err
 }
