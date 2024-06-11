@@ -7,6 +7,10 @@ import (
 	"os"
 )
 
+type executer interface {
+	execute() (string, error)
+}
+
 func main() {
 	proj := flag.String("p", "", "Project directory")
 	flag.Parse()
@@ -20,11 +24,12 @@ func run(project string, out io.Writer) error {
 	if project == "" {
 		return fmt.Errorf("Project directory required: %w", ErrValidation)
 	}
-	const numStep int = 2 // TODO refactor pipe building
-	pipe := make([]step, numStep)
+	const numStep int = 3 // TODO refactor pipe building
+	pipe := make([]executer, numStep)
 	pipe[0] = NewStep("go build", "go", []string{"build", ".", "errors"},
 		"go build: SUCCESS", project)
 	pipe[1] = NewStep("go test", "go", []string{"test", "-v"}, "go test: SUCCESS", project)
+	pipe[2] = newObservantStep("go formating", "gofmt", []string{"-l", "."}, "gofmt: SUCCESS", project)
 
 	for _, s := range pipe {
 		msg, err := s.execute()

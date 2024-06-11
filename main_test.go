@@ -16,14 +16,20 @@ func TestRun(t *testing.T) {
 	tCases := []testcase{
 		{
 			name:    "succesful build",
-			project: "testdata/testingTool",
+			project: "./testdata/testingTool",
 			expErr:  nil,
-			expOut:  "go build: SUCCESS\ngo test: SUCCESS\n",
+			expOut:  "go build: SUCCESS\ngo test: SUCCESS\ngofmt: SUCCESS\n",
 		},
 		{
 			name:    "failed build",
-			project: "testdata/testingToolErr",
+			project: "./testdata/testingToolErr",
 			expErr:  &stepErr{step: "go build"},
+			expOut:  "",
+		},
+		{
+			name:    "failed formating",
+			project: "./testdata/testingToolFmtErr",
+			expErr:  &stepErr{step: "go formating"},
 			expOut:  "",
 		},
 	}

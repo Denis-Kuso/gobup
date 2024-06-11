@@ -25,7 +25,7 @@ func NewStep(name, cmd string, args []string, msg, proj string) step {
 	}
 }
 
-func (s *step) execute() (string, error) {
+func (s step) execute() (string, error) {
 	cmd := exec.Command(s.cmd, s.args...)
 	cmd.Dir = s.proj
 	if err := cmd.Run(); err != nil {
