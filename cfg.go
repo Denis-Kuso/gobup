@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -15,37 +16,49 @@ type Cfg struct {
 	Content map[string]Pipeline
 }
 type Pipeline struct {
-	Name     string // ideally this would be the name of the pipeline
+	Name     string            // ideally this would be the name of the pipeline
 	Steps    []map[string]hook `yaml:"cmds"`
-	Run      bool   `yaml:"run"`
-	FailFast bool   `yaml:"fail_fast"`
+	Run      bool              `yaml:"run"`
+	FailFast bool              `yaml:"fail_fast"`
 }
 
 type hook struct {
-	Name string `yaml:"cmdName"`
+	Name string   `yaml:"cmdName"`
 	Args []string `yaml:"args"`
 }
 
+// TODO Make pipeline
+// return a collection of pipelines?
 
-func loadCfg() {
+// read config file
+func loadCfg(debug bool) (Cfg, error) {
+	// TODO refactor
 	file, err := os.ReadFile("config.yaml")
 	if err != nil {
 		fmt.Println("no config file found, probably")
-		os.Exit(23)
+		// TODO perhaps your own custom error type
+		return Cfg{}, err
 	}
 	draft0 := Cfg{}
 	err = yaml.Unmarshal(file, &draft0.Content)
 	if err != nil {
 		fmt.Printf("config read err: %v\n", err)
+		// TODO perhaps your own custom error type
+		return draft0, err
 	}
-	for pipename, content := range draft0.Content {
-		fmt.Printf("######################\n")
-		fmt.Printf("found pipename: %q\n- properties:\n - run: %v\n - fail fast: %v\n", pipename, content.Run, content.FailFast)
-		fmt.Printf("%s has following steps:\n", pipename)
+	return draft0, nil
+}
+
+// print to out - mostly for debugging purposes
+func printCfg(cfg *Cfg, out io.Writer) {
+	for pipename, content := range cfg.Content {
+		fmt.Fprintf(out, "######################\n")
+		fmt.Fprintf(out, "found pipename: %q\n- properties:\n - run: %v\n - fail fast: %v\n", pipename, content.Run, content.FailFast)
+		fmt.Fprintf(out, " %q has following steps:\n", pipename)
 		for name, vals := range content.Steps {
-			fmt.Printf("step: %d\n", name)
+			fmt.Fprintf(out, "step: %d\n", name)
 			for stepName, hook := range vals {
-				fmt.Printf("  - step name: %s\n  - exe: %q\n  - args: %v\n", stepName, hook.Name, hook.Args)
+				fmt.Fprintf(out, "  - step name: %s\n  - exe: %q\n  - args: %v\n", stepName, hook.Name, hook.Args)
 			}
 		}
 	}
