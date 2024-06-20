@@ -31,7 +31,7 @@ type hook struct {
 // return a collection of pipelines?
 
 // read config file
-func loadCfg(debug bool) (Cfg, error) {
+func loadCfg() (Cfg, error) {
 	// TODO refactor
 	file, err := os.ReadFile("config.yaml")
 	if err != nil {
@@ -47,6 +47,24 @@ func loadCfg(debug bool) (Cfg, error) {
 		return draft0, err
 	}
 	return draft0, nil
+}
+
+// flags, options decide which action/pipeline will be ran
+func getPipelines(c Cfg) map[string]Pipeline {
+	return c.Content
+}
+
+// TODO where does the map m comes from?
+// TODO should project be passed here?
+func makePipe(m []map[string]hook, project string) []executer {
+	pipe := make([]executer, len(m))
+	for i, step := range m {
+		for name, options := range step {
+			stepic := NewStep(name, options.Name, options.Args, fmt.Sprintf("%q: %s.", name, "SUCCESS"), project)
+			pipe[i] = stepic
+		}
+	}
+	return pipe
 }
 
 // print to out - mostly for debugging purposes

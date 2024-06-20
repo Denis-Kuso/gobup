@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
+	// "time"
 )
 
 type executer interface {
@@ -32,15 +32,26 @@ func run(project string, out io.Writer) error {
 	faults := make(chan error)
 	done := make(chan struct{})
 	signal.Notify(manager, syscall.SIGINT, syscall.SIGTERM)
-	const numStep int = 4 // TODO refactor pipe building
-	pipe := make([]executer, numStep)
-	pipe[0] = NewStep("go build", "go", []string{"build", ".", "errors"},
-		"go build: SUCCESS", project)
-	pipe[1] = NewStep("go test", "go", []string{"test", "-v"}, "go test: SUCCESS", project)
-	pipe[2] = newObservantStep("go formating", "gofmt", []string{"-l", "."}, "gofmt: SUCCESS", project)
-	var sleep time.Duration = 5 * time.Second // arbitrary decision
-	pipe[3] = NewTimeoutStep("git push", "git", []string{"push", "origin", "master"}, "git push: SUCCESS", project, sleep)
-
+	//	const numStep int = 4 // TODO refactor pipe building
+	//	pipe := make([]executer, numStep)
+	//	pipe[0] = NewStep("go build", "go", []string{"build", ".", "errors"},
+	//		"go build: SUCCESS", project)
+	//	pipe[1] = NewStep("go test", "go", []string{"test", "-v"}, "go test: SUCCESS", project)
+	//	pipe[2] = newObservantStep("go formating", "gofmt", []string{"-l", "."}, "gofmt: SUCCESS", project)
+	//	var sleep time.Duration = 5 * time.Second // arbitrary decision
+	//	pipe[3] = NewTimeoutStep("git push", "git", []string{"push", "origin", "master"}, "git push: SUCCESS", project, sleep)
+	c, err := loadCfg()
+	if err != nil {
+		fmt.Printf("Config err: %v", err)
+		os.Exit(-1)
+	}
+	pipes := getPipelines(c)
+	pre_commit, ok := pipes["pre-commit"]
+	if !ok {
+		fmt.Println("no such pipe")
+		os.Exit(22)
+	}
+	pipe := makePipe(pre_commit.Steps, project)
 	go func() {
 		for _, s := range pipe {
 			msg, err := s.execute()

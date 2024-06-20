@@ -5,15 +5,19 @@ pre-commit:
   # sequence of commands to run in this pipeline
   cmds:
     - build:
-        cmdName: go build
+        cmdName: go
         # args are ordered
         args:
-          - "-o"
-          - "binaryName"
-    - test:
-        cmdName: go test
-        args:
+          #- "-o"
+          #- "binaryName"
+          - "build"
           - "."
+          - "errors"
+    - test:
+        cmdName: go
+        args:
+          - "test"
+            #- "."
           - "-v"
     - format:
         cmdName: gofmt
