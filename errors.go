@@ -5,7 +5,10 @@ import (
 	"fmt"
 )
 
-var ErrValidation = errors.New("validation failure")
+var (
+	ErrValidation = errors.New("validation failure")
+	ErrConfig     = errors.New("configuration failure")
+)
 
 type stepErr struct {
 	// which CI step caused the error
