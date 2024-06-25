@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -31,16 +30,14 @@ type hook struct {
 func LoadCfg(in io.Reader) (Cfg, error) {
 	var buf []byte
 	buf, err := io.ReadAll(in)
-	if err != nil {
-		fmt.Println("could not read from %v", in)
-		// TODO perhaps your own custom error type
-		return Cfg{}, err
-	}
 	c := Cfg{}
+	if err != nil {
+		err = fmt.Errorf("%w: cannot read from %v: %s", ErrConfig, in, err)
+		return c, err
+	}
 	err = yaml.Unmarshal(buf, &c)
 	if err != nil {
-		fmt.Printf("config read err: %v\n", err)
-		// TODO perhaps your own custom error type
+		err = fmt.Errorf("%w: cannot parse yaml file %v: %s", ErrConfig, in, err)
 		return c, err
 	}
 	return c, nil
@@ -116,13 +113,14 @@ func MakeTemplateCfg(out io.Writer) error {
 	c := newTemplateCfg()
 	data, err := yaml.Marshal(c)
 	if err != nil {
-		fmt.Printf("cannot make template: %v\n", err)
+		err = fmt.Errorf("%w: cannot marshal to %v: %s", ErrConfig, out, err)
 		return err
 	}
-	// is n - number of bytes useful?
-	_, err = out.Write(data)
+	N := len(data)
+	n, err := out.Write(data)
 	if err != nil {
 		fmt.Printf("cannot make template: %v\n", err)
+		err = fmt.Errorf("%w: cannot write to %v: .Wrote %d, expected: %d bytes:%s", ErrConfig, out, n, N, err)
 		return err
 	}
 	return nil
