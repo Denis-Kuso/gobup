@@ -7,7 +7,6 @@ import (
 
 var (
 	ErrValidation = errors.New("validation failure")
-	ErrConfig     = errors.New("configuration failure")
 )
 
 type stepErr struct {

@@ -1,11 +1,14 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 
 	"gopkg.in/yaml.v3"
 )
+
+var ErrConfig = errors.New("configuration failure")
 
 // read cfg
 // validate Cfg
@@ -136,16 +139,16 @@ func getPipelines(c Cfg) map[string]Pipeline {
 
 // TODO where does the map m comes from?
 // TODO should project be passed here?
-func makePipe(m []map[string]hook, project string) []executer {
-	pipe := make([]executer, len(m))
-	for i, step := range m {
-		for name, options := range step {
-			stepic := NewStep(name, options.Name, options.Args, fmt.Sprintf("%q: %s.", name, "SUCCESS"), project)
-			pipe[i] = stepic
-		}
-	}
-	return pipe
-}
+//func makePipe(m []map[string]hook, project string) []executer {
+//	pipe := make([]executer, len(m))
+//	for i, step := range m {
+//		for name, options := range step {
+//			stepic := NewStep(name, options.Name, options.Args, fmt.Sprintf("%q: %s.", name, "SUCCESS"), project)
+//			pipe[i] = stepic
+//		}
+//	}
+//	return pipe
+//}
 
 // print to out - mostly for debugging purposes
 func printCfg(cfg *Cfg, out io.Writer) {
