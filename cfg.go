@@ -123,8 +123,7 @@ func MakeTemplateCfg(out io.Writer) error {
 	N := len(data)
 	n, err := out.Write(data)
 	if err != nil {
-		fmt.Printf("cannot make template: %v\n", err)
-		err = fmt.Errorf("%w: cannot write to %v: .Wrote %d, expected: %d bytes:%s", ErrConfig, out, n, N, err)
+		err = fmt.Errorf("%w: cannot write to %v. Wrote %d, expected: %d bytes: %s", ErrConfig, out, n, N, err)
 		return err
 	}
 	return nil

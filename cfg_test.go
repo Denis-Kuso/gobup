@@ -3,13 +3,14 @@ package main
 import (
 	"errors"
 	"io"
+	"os"
 	"strings"
 	"testing"
 )
 
 func TestLoadCfg(t *testing.T) {
 	// able to read file but not unmarshall according to structure of cfg
-	// unable to read (but compiles)
+	// nothing to read (but compiles)
 	// read a valid cfg "file"
 	type testcase struct {
 		name   string
@@ -59,6 +60,41 @@ pre-commit:
 	for _, tc := range tCases {
 		t.Run(tc.name, func(t *testing.T) {
 			_, gotErr := LoadCfg(tc.input)
+			if tc.expErr != nil {
+				if gotErr == nil {
+					t.Errorf("Expected error: %q. Got nil instead", tc.expErr)
+					return
+				}
+				if !errors.Is(gotErr, tc.expErr) {
+					t.Errorf("Error types differ. Expected: %q, got :%q instead", tc.expErr, gotErr)
+				}
+				return
+			}
+			if gotErr != nil {
+				t.Errorf("Expected no error, got: %q", gotErr)
+				return
+			}
+		})
+	}
+}
+
+func TestWriteTemplateCfg(t *testing.T) {
+	// TODO need to check the output as well
+	type testcase struct {
+		name   string
+		expErr error
+		output io.Writer
+	}
+	tCases := []testcase{
+		{
+			name:   "invalid file",
+			expErr: ErrConfig,
+			output: (*os.File)(nil),
+		},
+	}
+	for _, tc := range tCases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotErr := MakeTemplateCfg(tc.output)
 			if tc.expErr != nil {
 				if gotErr == nil {
 					t.Errorf("Expected error: %q. Got nil instead", tc.expErr)
