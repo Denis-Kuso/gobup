@@ -12,14 +12,12 @@ import (
 // validate Cfg
 // flags handled elsewhere?
 // cfg composed of pipelines/executers
-type Cfg struct {
-	Content map[string]Pipeline
-}
+type Cfg map[string]Pipeline
+
 type Pipeline struct {
-	Name     string            // ideally this would be the name of the pipeline
-	Steps    []map[string]hook `yaml:"cmds"`
 	Run      bool              `yaml:"run"`
 	FailFast bool              `yaml:"fail_fast"`
+	Steps    []map[string]hook `yaml:"cmds"`
 }
 
 type hook struct {
@@ -28,30 +26,29 @@ type hook struct {
 }
 
 // TODO Make pipeline
-// return a collection of pipelines?
 
 // read config file
-func loadCfg() (Cfg, error) {
-	// TODO refactor
-	file, err := os.ReadFile("config.yaml")
+func LoadCfg(in io.Reader) (Cfg, error) {
+	var buf []byte
+	buf, err := io.ReadAll(in)
 	if err != nil {
-		fmt.Println("no config file found, probably")
+		fmt.Println("could not read from %v", in)
 		// TODO perhaps your own custom error type
 		return Cfg{}, err
 	}
-	draft0 := Cfg{}
-	err = yaml.Unmarshal(file, &draft0.Content)
+	c := Cfg{}
+	err = yaml.Unmarshal(buf, &c)
 	if err != nil {
 		fmt.Printf("config read err: %v\n", err)
 		// TODO perhaps your own custom error type
-		return draft0, err
+		return c, err
 	}
-	return draft0, nil
+	return c, nil
 }
 
 // flags, options decide which action/pipeline will be ran
 func getPipelines(c Cfg) map[string]Pipeline {
-	return c.Content
+	return c
 }
 
 // TODO where does the map m comes from?
