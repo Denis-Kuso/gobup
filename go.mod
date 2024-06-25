@@ -1,4 +1,4 @@
-module example.com/gobup
+module github.com/Denis-Kuso/gobup
 
 go 1.21.1
 
