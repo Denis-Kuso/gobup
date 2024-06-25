@@ -40,6 +40,10 @@ func LoadCfg(in io.Reader) (Cfg, error) {
 		err = fmt.Errorf("%w: cannot parse yaml file %v: %s", ErrConfig, in, err)
 		return c, err
 	}
+	if len(c) == 0 {
+		err = fmt.Errorf("%w: no config data loaded from %v", ErrConfig, in)
+		return c, err
+	}
 	return c, nil
 }
 
