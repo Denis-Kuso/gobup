@@ -46,6 +46,88 @@ func LoadCfg(in io.Reader) (Cfg, error) {
 	return c, nil
 }
 
+// enables writing cfg structure to a file
+func newTemplateCfg() Cfg {
+	// TODO this function can be refactored (break up)
+	const numOfPipes = 2
+	build := hook{
+		Name: "go",
+		Args: []string{"build", "."},
+	}
+	test := hook{
+		Name: "go",
+		Args: []string{"test", "."},
+	}
+	format := hook{
+		Name: "gofmt",
+		Args: []string{"-l", "."},
+	}
+	push := hook{
+		Name: "git",
+		Args: []string{"push", "origin", "main"},
+	}
+	m := make(map[string]hook)
+	m0 := make(map[string]hook)
+	m1 := make(map[string]hook)
+	m2 := make(map[string]hook)
+	m["build"] = build
+	m0["test"] = test
+	m2["format"] = format
+	var s []map[string]hook
+	var s1 []map[string]hook
+	s1 = append(s1, m, m0, m2)
+	preCommit := Pipeline{
+		Run:      true,
+		FailFast: false,
+		Steps:    s1,
+	}
+	m1["push"] = push
+	s = append(s, m, m0, m2, m1)
+	prePush := Pipeline{
+		Run:      false,
+		FailFast: true,
+		Steps:    s,
+	}
+	pipe := make(map[string]Pipeline, numOfPipes)
+	pipe["pre-commit"] = preCommit
+	pipe["pre-push"] = prePush
+	return pipe
+}
+
+// TODO - incomplete helper - make array of maps of hooks
+func maker(hs []hook, hookNames []string) []map[string]hook {
+	N := len(hs)
+	s := make([]map[string]hook, N)
+	if N != len(hookNames) {
+		// maybe throw an err?
+		fmt.Printf("cannot make, incompatible sizes: %d, %d", len(hs), len(hookNames))
+		return nil
+	}
+	m := make(map[string]hook, 1)
+	for i, h := range hs {
+		m[hookNames[i]] = h
+		s[i] = m
+	}
+	return s
+}
+
+func MakeTemplateCfg(out io.Writer) error {
+	var data []byte
+	c := newTemplateCfg()
+	data, err := yaml.Marshal(c)
+	if err != nil {
+		fmt.Printf("cannot make template: %v\n", err)
+		return err
+	}
+	// is n - number of bytes useful?
+	_, err = out.Write(data)
+	if err != nil {
+		fmt.Printf("cannot make template: %v\n", err)
+		return err
+	}
+	return nil
+}
+
 // flags, options decide which action/pipeline will be ran
 func getPipelines(c Cfg) map[string]Pipeline {
 	return c
@@ -66,7 +148,7 @@ func makePipe(m []map[string]hook, project string) []executer {
 
 // print to out - mostly for debugging purposes
 func printCfg(cfg *Cfg, out io.Writer) {
-	for pipename, content := range cfg.Content {
+	for pipename, content := range *cfg {
 		fmt.Fprintf(out, "######################\n")
 		fmt.Fprintf(out, "found pipename: %q\n- properties:\n - run: %v\n - fail fast: %v\n", pipename, content.Run, content.FailFast)
 		fmt.Fprintf(out, " %q has following steps:\n", pipename)
