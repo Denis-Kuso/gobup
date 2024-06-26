@@ -15,11 +15,12 @@ var ErrConfig = errors.New("configuration failure")
 // flags handled elsewhere?
 // cfg composed of pipelines/executers
 type Cfg map[string]Pipeline
+type Action map[string]hook
 
 type Pipeline struct {
-	Run      bool              `yaml:"run"`
-	FailFast bool              `yaml:"fail_fast"`
-	Steps    []map[string]hook `yaml:"cmds"`
+	Run      bool     `yaml:"run"`
+	FailFast bool     `yaml:"fail_fast"`
+	Steps    []Action `yaml:"cmds"`
 }
 
 type hook struct {
@@ -77,8 +78,9 @@ func newTemplateCfg() Cfg {
 	m["build"] = build
 	m0["test"] = test
 	m2["format"] = format
-	var s []map[string]hook
-	var s1 []map[string]hook
+	//var s []map[string]hook
+	var s []Action
+	var s1 []Action
 	s1 = append(s1, m, m0, m2)
 	preCommit := Pipeline{
 		Run:      true,
