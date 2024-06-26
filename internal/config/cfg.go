@@ -26,6 +26,8 @@ type Pipeline struct {
 type hook struct {
 	Name string   `yaml:"cmdName"`
 	Args []string `yaml:"args"`
+	// IsSpecial bool `yaml:"special"`
+	// Timeout int `yaml:"timeout"`
 }
 
 // TODO Make pipeline
