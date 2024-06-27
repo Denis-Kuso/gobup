@@ -10,11 +10,12 @@ import (
 
 type timeoutStep struct {
 	step
-	timeout time.Duration
+	timeout     time.Duration
+	stdoutAsErr bool
 }
 
 func NewTimeoutStep(name, exe string, args []string, message, proj string,
-	timeout time.Duration) timeoutStep {
+	timeout time.Duration, stdoutAsErr bool) timeoutStep {
 	const defaultTimeout time.Duration = 30
 	t := timeoutStep{}
 	t.step = NewStep(name, exe, args, message, proj)
@@ -23,15 +24,17 @@ func NewTimeoutStep(name, exe string, args []string, message, proj string,
 	} else {
 		t.timeout = timeout
 	}
+	t.stdoutAsErr = stdoutAsErr
 	return t
 }
 
-func (t timeoutStep) execute() (string, error) {
+func (t timeoutStep) Execute() (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), t.timeout)
 	defer cancel()
 	cmd := exec.CommandContext(ctx, t.cmd, t.args...)
-	var out bytes.Buffer
+	var out, stderr bytes.Buffer
 	cmd.Stdout = &out
+	cmd.Stderr = &stderr
 	cmd.Dir = t.proj
 	if err := cmd.Run(); err != nil {
 		if err == context.DeadlineExceeded {
@@ -43,8 +46,17 @@ func (t timeoutStep) execute() (string, error) {
 		}
 		return "", &StepErr{
 			step:  t.name,
-			msg:   "failed executing",
+			msg:   fmt.Sprintf("failed executing: out:\n %s: err: \n%s", out.String(), stderr.String()),
 			cause: err}
+	}
+	// tools (e.g gofmt) which return 0 on success, but some "error" msg is returned
+	// to stdout
+	if t.stdoutAsErr && (out.Len() > 0) {
+		return "", &StepErr{
+			step:  t.name,
+			msg:   fmt.Sprintf("%s", out.String()),
+			cause: nil, // no underlying cause, apart from our interpretation of output as an err
+		}
 	}
 	return t.msg, nil
 }
