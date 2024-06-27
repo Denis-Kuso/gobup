@@ -22,6 +22,8 @@ pre-commit:
     - format:
         cmdName: gofmt
         args: ["-l", "."]
+        # treats output to stdout as err (such as gofmt) - returns succes when there are files to be formated
+        stdoutAsErr: true
 pre-push:
   run: false
   # failed command will prevent execution of next command

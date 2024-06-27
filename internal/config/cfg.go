@@ -24,10 +24,10 @@ type Pipeline struct {
 }
 
 type hook struct {
-	Name string   `yaml:"cmdName"`
-	Args []string `yaml:"args"`
-	// IsSpecial bool `yaml:"special"`
-	// Timeout int `yaml:"timeout"`
+	Name      string   `yaml:"cmdName"`
+	Args      []string `yaml:"args"`
+	IsSpecial bool     `yaml:"stdoutAsErr"`
+	Timeout   uint     `yaml:"timeout,omitempty"`
 }
 
 // TODO Make pipeline
@@ -66,12 +66,14 @@ func newTemplateCfg() Cfg {
 		Args: []string{"test", "."},
 	}
 	format := hook{
-		Name: "gofmt",
-		Args: []string{"-l", "."},
+		Name:      "gofmt",
+		Args:      []string{"-l", "."},
+		IsSpecial: true,
 	}
 	push := hook{
-		Name: "git",
-		Args: []string{"push", "origin", "main"},
+		Name:    "git",
+		Args:    []string{"push", "origin", "main"},
+		Timeout: 15,
 	}
 	m := make(map[string]hook)
 	m0 := make(map[string]hook)

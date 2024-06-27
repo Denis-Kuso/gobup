@@ -17,27 +17,32 @@ func TestLoadCfg(t *testing.T) {
 		expErr error
 		input  io.Reader
 	}
-	validCfg := strings.NewReader(`# pipeline name
-pre-commit:
+	validCfg := strings.NewReader(`pre-commit:
   run: true
   # if possible, all commands run as warnings
   fail_fast: false
   # sequence of commands to run in this pipeline
   cmds:
     - build:
-        cmdName: go build
+        cmdName: go
         # args are ordered
         args:
-          - one
-          - two
-          - three
-    - test:
-        cmdName: go test
-        args:
+          #- "-o"
+          #- "binaryName"
+          - "build"
           - "."
+          - "errors"
+    - test:
+        cmdName: go
+        args:
+          - "test"
+            #- "."
+          - "-v"
     - format:
         cmdName: gofmt
-        args: ["-l", "."]`)
+        args: ["-l", "."]
+        # treats output to stdout as err (such as gofmt) - returns succes when there are files to be formated
+        stdoutAsErr: true`)
 	validReader := strings.NewReader("Perfectly valid reader, but not valid cfg")
 	noData := strings.NewReader("")
 	tCases := []testcase{
