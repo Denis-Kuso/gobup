@@ -1,4 +1,4 @@
-package main
+package actions
 
 import (
 	"bytes"
@@ -23,16 +23,16 @@ func (o observantStep) execute() (string, error) {
 	cmd.Stdout = &out
 	cmd.Dir = o.proj
 	if err := cmd.Run(); err != nil {
-		return "", &stepErr{
+		return "", &StepErr{
 			step:  o.name,
 			msg:   "failed to execute",
 			cause: err,
 		}
 	}
 	if out.Len() > 0 {
-		return "", &stepErr{
-			step: o.name,
-			msg:  fmt.Sprintf("poorly formated files: %s", out.String()),
+		return "", &StepErr{
+			step:  o.name,
+			msg:   fmt.Sprintf("poorly formated files: %s", out.String()),
 			cause: nil, // gofmt is based on opinion/conventions
 		}
 	}

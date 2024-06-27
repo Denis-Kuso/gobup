@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"testing"
+	"github.com/Denis-Kuso/gobup/internal/actions"
 )
 
 func TestRun(t *testing.T) {
@@ -29,14 +30,14 @@ func TestRun(t *testing.T) {
 		{
 			name:     "failed build",
 			project:  "./testdata/testingToolErr",
-			expErr:   &stepErr{step: "go build"},
+			expErr:   &actions.StepErr{step: "go build"},
 			expOut:   "",
 			setupGit: false,
 		},
 		{
 			name:     "failed formating",
 			project:  "./testdata/testingToolFmtErr",
-			expErr:   &stepErr{step: "go formating"},
+			expErr:   &actions.StepErr{step: "go formating"},
 			expOut:   "",
 			setupGit: false,
 		},

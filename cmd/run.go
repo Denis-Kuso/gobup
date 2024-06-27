@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 
+	//"github.com/Denis-Kuso/gobup/internal/actions"
 	"github.com/Denis-Kuso/gobup/internal/config"
 	"github.com/spf13/cobra"
 )
@@ -16,6 +17,7 @@ const (
 	//errAsWarn = "err-as-warn"
 	pipeline = "pipeline"
 )
+
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -33,7 +35,7 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
 		}
-		steps, err := preparePipes(akcija)
+		steps, err := preparePipes(nil,akcija)
 		if err != nil {
 			fmt.Printf("ERR: %v\n", err)
 		}
@@ -59,9 +61,9 @@ func init() {
 // you already have "run" implemented - now you need to prep the state, such
 // given the flags and options provided "run" runs according to state
 // How?
-// [x] load cfg 
+// [x] load cfg
 // if pipeline provided and present in cfg, add to queue
-  // else add pipelines where run == true to a queue
+// else add pipelines where run == true to a queue
 // if n == true, print queue.commands
 // else run queue
 func preparePipes(cfg io.Reader, pipeline string) ([]config.Action, error) {
@@ -74,11 +76,11 @@ func preparePipes(cfg io.Reader, pipeline string) ([]config.Action, error) {
 	if pipeline != "" {
 		fmt.Printf("does %s exist?\n", pipeline)
 		pipe, ok := c[pipeline]
-		if ! ok{
+		if !ok {
 			return red, fmt.Errorf("%q not found in %v", pipeline, cfg)
 		}
 		red = append(red, pipe.Steps...)
-	}else {
+	} else {
 		for _, pipe := range c {
 			if pipe.Run {
 				red = append(red, pipe.Steps...)
@@ -91,20 +93,18 @@ func preparePipes(cfg io.Reader, pipeline string) ([]config.Action, error) {
 // perhaps, once/if the pipeline options are irelevant, return/operate on
 // "steps" instead...
 func makeExeSteps(pipelines []config.Action) error {
-	var steps []string
 	for _, pipe := range pipelines {
 		s := pipe
 		for name, cmd := range s {
 			// I should make a "NewStep"/NewTimeoutStep" here
-			// Where should NewStep be located?
-			steps = append(steps, cmd.Name)
-				// how do I pass the project??
-				// timeout option?
+			fmt.Printf("making step: %q with exe: %q and args: %v\n", name, cmd.Args, cmd.Name)
+			// how do I pass the project??
+			// timeout option?
+			// prints to output as err??
 		}
 	}
 	return nil
 }
-
 
 // what about warnings?
 // I could ignore this feature for know
