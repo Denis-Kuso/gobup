@@ -22,7 +22,7 @@ func NewTimeoutStep(name, exe string, args []string, message, proj string,
 	if timeout == 0 {
 		t.timeout = defaultTimeout * time.Second
 	} else {
-		t.timeout = timeout
+		t.timeout = timeout * time.Second
 	}
 	t.stdoutAsErr = stdoutAsErr
 	return t
