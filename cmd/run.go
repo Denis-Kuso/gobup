@@ -6,8 +6,9 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"time"
 
-	//"github.com/Denis-Kuso/gobup/internal/actions"
+	"github.com/Denis-Kuso/gobup/internal/actions"
 	"github.com/Denis-Kuso/gobup/internal/config"
 	"github.com/spf13/cobra"
 )
@@ -34,10 +35,12 @@ to quickly create a Cobra application.`,
 		_, err = cmd.Flags().GetBool(simulateExec)
 		if err != nil {
 			fmt.Printf("err: %v\n", err)
+			return
 		}
-		steps, err := preparePipes(nil,akcija)
+		steps, err := preparePipes(nil, akcija)
 		if err != nil {
 			fmt.Printf("ERR: %v\n", err)
+			return
 		}
 		for i, s := range steps {
 			fmt.Printf("step %d: :%v\n", i, s)
@@ -92,18 +95,18 @@ func preparePipes(cfg io.Reader, pipeline string) ([]config.Action, error) {
 
 // perhaps, once/if the pipeline options are irelevant, return/operate on
 // "steps" instead...
-func makeExeSteps(pipelines []config.Action) error {
+func makeExeSteps(pipelines []config.Action, project string) []actions.Executer {
+	var steps []actions.Executer
 	for _, pipe := range pipelines {
 		s := pipe
 		for name, cmd := range s {
-			// I should make a "NewStep"/NewTimeoutStep" here
-			fmt.Printf("making step: %q with exe: %q and args: %v\n", name, cmd.Args, cmd.Name)
-			// how do I pass the project??
-			// timeout option?
-			// prints to output as err??
+			msg := fmt.Sprintf(" step: %s -> SUCCESS", name)
+			// todo validate project
+			step := actions.NewTimeoutStep(name, cmd.Name, cmd.Args, msg, project, time.Duration(cmd.Timeout), cmd.IsSpecial)
+			steps = append(steps, step)
 		}
 	}
-	return nil
+	return steps
 }
 
 // what about warnings?

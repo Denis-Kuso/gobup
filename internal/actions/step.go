@@ -5,6 +5,10 @@ import (
 	"os/exec"
 )
 
+type Executer interface {
+	Execute() (string, error)
+}
+
 // A "continous-integration" step
 type step struct {
 	name string
