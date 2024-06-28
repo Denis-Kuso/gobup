@@ -19,7 +19,7 @@ func NewTimeoutStep(name, exe string, args []string, message, proj string,
 	const defaultTimeout time.Duration = 30
 	t := timeoutStep{}
 	t.step = NewStep(name, exe, args, message, proj)
-	if timeout == 0 {
+	if timeout <= 0 {
 		t.timeout = defaultTimeout * time.Second
 	} else {
 		t.timeout = timeout * time.Second
