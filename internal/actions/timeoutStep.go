@@ -49,7 +49,7 @@ func (t timeoutStep) Execute() (string, error) {
 			msg:   fmt.Sprintf("failed executing: out:\n %s: err: \n%s", out.String(), stderr.String()),
 			cause: err}
 	}
-	// tools (e.g gofmt) which return 0 on success, but some "error" msg is returned
+	// tools (e.g gofmt) which return 0 on success, but some "error msg is returned
 	// to stdout
 	if t.stdoutAsErr && (out.Len() > 0) {
 		return "", &StepErr{
