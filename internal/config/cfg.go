@@ -35,8 +35,11 @@ type hook struct {
 // read config file
 func LoadCfg(in io.Reader) (Cfg, error) {
 	var buf []byte
-	buf, err := io.ReadAll(in)
 	c := Cfg{}
+	if (&in) == nil {
+		return c, fmt.Errorf("passed nil as input, please initialize: %q", in)
+	}
+	buf, err := io.ReadAll(in)
 	if err != nil {
 		err = fmt.Errorf("%w: cannot read from %v: %s", ErrConfig, in, err)
 		return c, err
