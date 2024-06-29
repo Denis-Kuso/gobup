@@ -40,7 +40,11 @@ They are then modified such that your whatever you specifed in config.yaml
 		}
 		if !noGit {
 			fmt.Printf("normal init, flag: %v\n", noGit)
-			makeHookFiles(project)
+			err = makeHookFiles(project)
+			if err != nil {
+				fmt.Printf("unable to make hook files: %v\n", err)
+				return
+			}
 		} else {
 			fmt.Printf("Don't want to use Git, flag: %v\n", noGit)
 		}
