@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"github.com/Denis-Kuso/gobup/internal/actions"
@@ -37,13 +38,30 @@ to quickly create a Cobra application.`,
 			fmt.Printf("err: %v\n", err)
 			return
 		}
-		steps, err := preparePipes(nil, akcija)
+		cfg, err := os.Open(cfgName)
+		defer cfg.Close()
+		if err != nil {
+			fmt.Printf("cannot open config file: %v\n", err)
+			return
+		}
+		steps, err := preparePipes(cfg, akcija)
 		if err != nil {
 			fmt.Printf("ERR: %v\n", err)
 			return
 		}
-		for i, s := range steps {
-			fmt.Printf("step %d: :%v\n", i, s)
+		// any pipelines to run?
+		if len(steps) == 0 {
+			fmt.Printf("nothing to run\n")
+			return
+		}
+		koraci := makeExeSteps(steps, args[0])
+		for _, korak := range koraci {
+			msg, err := korak.Execute()
+			if err != nil {
+				fmt.Print(err)
+				return
+			}
+			fmt.Print(msg)
 		}
 	},
 }
@@ -70,14 +88,12 @@ func init() {
 // if n == true, print queue.commands
 // else run queue
 func preparePipes(cfg io.Reader, pipeline string) ([]config.Action, error) {
-	// perhaps make steps immediateley - for that, need to export a type
 	var red []config.Action
 	c, err := config.LoadCfg(cfg)
 	if err != nil {
 		return red, err
 	}
 	if pipeline != "" {
-		fmt.Printf("does %s exist?\n", pipeline)
 		pipe, ok := c[pipeline]
 		if !ok {
 			return red, fmt.Errorf("%q not found in %v", pipeline, cfg)
