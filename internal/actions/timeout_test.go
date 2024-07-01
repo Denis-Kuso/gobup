@@ -97,7 +97,6 @@ func TestRun(t *testing.T) {
 			stepName: "listing",
 			cmd:      "ls",
 			args:     []string{"-la"},
-			special:  true,
 		},
 	}
 	for _, tc := range tCases {
