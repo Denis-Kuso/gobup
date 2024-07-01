@@ -17,8 +17,7 @@ import (
 
 const (
 	simulateExec = "dry-run"
-	//errAsWarn = "err-as-warn"
-	pipeline = "pipeline"
+	pipeline     = "pipeline"
 )
 
 // runCmd represents the run command
@@ -91,14 +90,8 @@ func init() {
 	runCmd.Flags().StringP(pipeline, "p", "", "a specific pipeline (e.g. \"pre-commit\") defined in your config.yaml to run")
 }
 
-// you already have "run" implemented - now you need to prep the state, such
-// given the flags and options provided "run" runs according to state
-// How?
-// [x] load cfg
 // if pipeline provided and present in cfg, add to queue
 // else add pipelines where run == true to a queue
-// if n == true, print queue.commands
-// else run queue
 func preparePipes(cfg io.Reader, pipeline string) ([]config.Action, error) {
 	var red []config.Action
 	c, err := config.LoadCfg(cfg)
@@ -129,15 +122,9 @@ func makeExeSteps(pipelines []config.Action, project string) []actions.Executer 
 		s := pipe
 		for name, cmd := range s {
 			msg := fmt.Sprintf(" step: %s -> SUCCESS", name)
-			// todo validate project
 			step := actions.NewTimeoutStep(name, cmd.Name, cmd.Args, msg, project, time.Duration(cmd.Timeout), cmd.IsSpecial)
 			steps = append(steps, step)
 		}
 	}
 	return steps
 }
-
-// what about warnings?
-// I could ignore this feature for know
-// I could have a warnings channel, to which I add, instead of the
-// errs channel
