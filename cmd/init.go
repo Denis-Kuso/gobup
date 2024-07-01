@@ -19,18 +19,15 @@ const (
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
-	Use:   "init <project_dir>",
-	Short: "initialize tool in provided dir",
-	Long: `Creates config file in specified <project_dir>. If non-existing, creates
-	pre-commit and pre-push files in .git/hooks. For example:
-
-They are then modified such that your whatever you specifed in config.yaml
-	will be ran on pre-commit and pre-push.`,
-	Example: " gobup init .\n gobup init --no-git ./someProjectDir",
+	Use:     "init <project_dir>",
+	Short:   "Initialize tool in provided directory",
+	Long:    `Creates config file named .gobup.yaml in provided directory.`,
+	Example: " - create config in current dir\n   gobup init .",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		project := args[0]
 		fmt.Printf("init called on project %q\n", project)
+		// TODO err HANDLIGN!!!!!
 		createTemplate(project)
 	},
 }
