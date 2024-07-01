@@ -19,7 +19,6 @@ type Action map[string]hook
 
 type Pipeline struct {
 	Run      bool     `yaml:"run"`
-	FailFast bool     `yaml:"fail_fast"`
 	Steps    []Action `yaml:"cmds"`
 }
 
@@ -91,14 +90,12 @@ func newTemplateCfg() Cfg {
 	s1 = append(s1, m, m0, m2)
 	preCommit := Pipeline{
 		Run:      true,
-		FailFast: false,
 		Steps:    s1,
 	}
 	m1["push"] = push
 	s = append(s, m, m0, m2, m1)
 	prePush := Pipeline{
 		Run:      false,
-		FailFast: true,
 		Steps:    s,
 	}
 	pipe := make(map[string]Pipeline, numOfPipes)
