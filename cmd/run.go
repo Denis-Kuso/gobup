@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/Denis-Kuso/gobup/internal/actions"
@@ -32,6 +33,17 @@ to quickly create a Cobra application.`,
 	with pre-push pipeline
 	 gobup run . -> run all pipelines (if their "run" field is set to true.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var project string
+		if len(args) == 0 {
+			project = "."
+		} else {
+			project = args[0]
+		}
+		fname, err := filepath.Abs(project)
+		if err != nil {
+			fmt.Printf("invalid pathname: %s", project)
+			return
+		}
 		akcija, err := cmd.Flags().GetString(pipeline)
 		_, err = cmd.Flags().GetBool(simulateExec)
 		if err != nil {
@@ -54,7 +66,7 @@ to quickly create a Cobra application.`,
 			fmt.Printf("nothing to run\n")
 			return
 		}
-		koraci := makeExeSteps(steps, args[0])
+		koraci := makeExeSteps(steps, fname)
 		for _, korak := range koraci {
 			msg, err := korak.Execute()
 			if err != nil {
