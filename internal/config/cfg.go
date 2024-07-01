@@ -18,8 +18,8 @@ type Cfg map[string]Pipeline
 type Action map[string]hook
 
 type Pipeline struct {
-	Run      bool     `yaml:"run"`
-	Steps    []Action `yaml:"cmds"`
+	Run   bool     `yaml:"run"`
+	Steps []Action `yaml:"cmds"`
 }
 
 type hook struct {
@@ -89,14 +89,14 @@ func newTemplateCfg() Cfg {
 	var s1 []Action
 	s1 = append(s1, m, m0, m2)
 	preCommit := Pipeline{
-		Run:      true,
-		Steps:    s1,
+		Run:   true,
+		Steps: s1,
 	}
 	m1["push"] = push
 	s = append(s, m, m0, m2, m1)
 	prePush := Pipeline{
-		Run:      false,
-		Steps:    s,
+		Run:   false,
+		Steps: s,
 	}
 	pipe := make(map[string]Pipeline, numOfPipes)
 	pipe["pre-commit"] = preCommit
@@ -160,7 +160,7 @@ func getPipelines(c Cfg) map[string]Pipeline {
 func printCfg(cfg *Cfg, out io.Writer) {
 	for pipename, content := range *cfg {
 		fmt.Fprintf(out, "######################\n")
-		fmt.Fprintf(out, "found pipename: %q\n- properties:\n - run: %v\n - fail fast: %v\n", pipename, content.Run, content.FailFast)
+		fmt.Fprintf(out, "found pipename: %q\n- properties:\n - run: %v\n", pipename, content.Run)
 		fmt.Fprintf(out, " %q has following steps:\n", pipename)
 		for name, vals := range content.Steps {
 			fmt.Fprintf(out, "step: %d\n", name)
