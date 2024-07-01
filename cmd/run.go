@@ -21,15 +21,9 @@ const (
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "run a set of commands defined in a pipeline",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-to quickly create a Cobra application.`,
-	Example: ` gobup run --dry-run -p pre-push -> print commands associated
-	with pre-push pipeline
-	 gobup run . -> run all pipelines (if their "run" field is set to true.`,
+	Use:     "run",
+	Short:   "Run a pipeline (set of commands) specified in .gobup.yaml",
+	Example: " - run all pipelines whose 'run' field is set to true\n   gobup run\n - run commands associated with pre-push pipeline\n   gobup run -p pre-push\n",
 	Run: func(cmd *cobra.Command, args []string) {
 		var project string
 		if len(args) == 0 {
@@ -81,7 +75,7 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	runCmd.Flags().StringP(pipeline, "p", "", "a specific pipeline (e.g. \"pre-commit\") defined in your config.yaml to run")
+	runCmd.Flags().StringP(pipeline, "p", "", "specific pipeline (e.g. \"pre-commit\") defined in your .gobup.yaml")
 }
 
 // if pipeline provided and present in cfg, add to queue
