@@ -108,7 +108,7 @@ func preparePipes(cfg io.Reader, pipeline string) ([]config.Action, error) {
 	if pipeline != "" {
 		pipe, ok := c[pipeline]
 		if !ok {
-			return red, fmt.Errorf("%q not found in %v", pipeline, cfg)
+			return red, fmt.Errorf("pipeline: %q not found", pipeline)
 		}
 		red = append(red, pipe.Steps...)
 	} else {
