@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	pipeline = "pipeline"
+	pipelineArg = "pipeline"
 )
 
 // runCmd represents the run command
@@ -24,8 +24,11 @@ var runCmd = &cobra.Command{
 	Use:     "run",
 	Short:   "Run a pipeline (set of commands) specified in .gobup.yaml",
 	Example: " - run all pipelines whose 'run' field is set to true\n   gobup run\n - run commands associated with pre-push pipeline\n   gobup run -p pre-push\n",
-	Run: func(cmd *cobra.Command, args []string) {
+	Args:    cobra.RangeArgs(0, 1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// ####### args preparation
 		var project string
+		// assume user means current dir
 		if len(args) == 0 {
 			project = "."
 		} else {
@@ -33,39 +36,35 @@ var runCmd = &cobra.Command{
 		}
 		fname, err := filepath.Abs(project)
 		if err != nil {
-			fmt.Printf("invalid pathname: %s", project)
-			return
+			return fmt.Errorf("%w: project: %s: %v", ErrValidation, project, err)
 		}
-		akcija, err := cmd.Flags().GetString(pipeline)
+		pipeline, err := cmd.Flags().GetString(pipelineArg)
 		if err != nil {
-			fmt.Printf("err: %v\n", err)
-			return
+			return fmt.Errorf("%w: %v: %q", ErrValidation, err, pipeline)
 		}
+		// ####### args preparation
 		cfg, err := os.Open(cfgName)
 		defer cfg.Close()
 		if err != nil {
-			fmt.Printf("cannot open config file: %v\n", err)
-			return
+			return fmt.Errorf("cannot open config file: %v", err)
 		}
-		steps, err := preparePipes(cfg, akcija)
+		steps, err := preparePipes(cfg, pipeline)
 		if err != nil {
-			fmt.Printf("ERR: %v\n", err)
-			return
+			return fmt.Errorf("%v", err)
 		}
 		// any pipelines to run?
 		if len(steps) == 0 {
-			fmt.Printf("nothing to run\n")
-			return
+			return fmt.Errorf("nothing to run. Are run fields of your all your pipelines set to false?")
 		}
 		koraci := makeExeSteps(steps, fname)
 		for _, korak := range koraci {
 			msg, err := korak.Execute()
 			if err != nil {
-				fmt.Print(err)
-				return
+				return err
 			}
 			fmt.Print(msg)
 		}
+		return nil
 	},
 }
 
@@ -75,7 +74,7 @@ func init() {
 	// Here you will define your flags and configuration settings.
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	runCmd.Flags().StringP(pipeline, "p", "", "specific pipeline (e.g. \"pre-commit\") defined in your .gobup.yaml")
+	runCmd.Flags().StringP(pipelineArg, "p", "", "specific pipeline (e.g. \"pre-commit\") defined in your .gobup.yaml")
 }
 
 // if pipeline provided and present in cfg, add to queue
