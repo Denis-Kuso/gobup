@@ -70,10 +70,6 @@ var runCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	runCmd.Flags().StringP(pipelineArg, "p", "", "specific pipeline (e.g. \"pre-commit\") defined in your .gobup.yaml")
 }
 
@@ -101,8 +97,6 @@ func preparePipes(cfg io.Reader, pipeline string) ([]config.Action, error) {
 	return red, nil
 }
 
-// perhaps, once/if the pipeline options are irelevant, return/operate on
-// "steps" instead...
 func makeExeSteps(pipelines []config.Action, project string) []actions.Executer {
 	var steps []actions.Executer
 	for _, pipe := range pipelines {
