@@ -2,8 +2,8 @@
 
 ## What
 
-A configuration-based local pipeline builder (CI-like). Edit a config file, 
-and have different commands execute based on your needs/workflow. 
+A configuration-based local pipeline builder (CI-like). Edit a config file,
+and have different commands execute based on your needs/workflow.
 
 ## Why
 
@@ -13,7 +13,7 @@ Sometimes made/edited hook files. All of which somewhat cumbersome for maintenan
 Wanted something that:
 
 - is CLI-based
-- can run independent of IDE/plugins. 
+- can run independent of IDE/plugins.
 - can be used easily with git hook files in git
 
 Also, given that, whilst developing, you might not need to adhere to
@@ -33,9 +33,9 @@ or from [releases](github.com/Denis-Kuso/gobup/releases/) page.
 ```bash
 gobup init <project_dir>
 ```
-Creates cfg file in the provided directory named `.gobup.yaml`. Best to provide 
-root of your project.
-
+Creates template cfg file in the provided directory named `.gobup.yaml`. Best to provide
+the root of your project.
+See example below:
 
 <details markdown=1><summary markdown="span">Example cfg</summary>
 
@@ -68,7 +68,7 @@ dev:
   run: true
   cmds:
     - lint:
-        cmdName: revive 
+        cmdName: revive
         args:
           - "-formatter"
           - "friendly"
@@ -86,7 +86,7 @@ gobup run
 ```
 
 Runs all actions specified in the cfg file in current directory, which have
-the propery `run: true`. 
+the propery `run: true`.
 
 ```bash
 gobup run -p <pipeline>
@@ -101,7 +101,7 @@ Only run the commands associated with `<pipeline>`, regardles if
 <details markdown=1><summary markdown="span">TODO</summary>
 
 - [ ] add `dry-run` flag
-- [ ] add `ignore-warnings` flag 
+- [ ] add `ignore-warnings` flag
 - [ ] make prettier output format
 - [ ] add git hook files compatibility
 </details>
