@@ -29,14 +29,12 @@ type hook struct {
 	Timeout   uint     `yaml:"timeout,omitempty"`
 }
 
-// TODO Make pipeline
-
 // read config file
 func LoadCfg(in io.Reader) (Cfg, error) {
 	var buf []byte
 	c := Cfg{}
-	if (&in) == nil {
-		return c, fmt.Errorf("passed nil as input, please initialize: %q", in)
+	if in == nil || (&in) == nil {
+		return c, fmt.Errorf("%w: passed nil as input, please initialize: %q", ErrConfig, in)
 	}
 	buf, err := io.ReadAll(in)
 	if err != nil {
@@ -104,23 +102,6 @@ func newTemplateCfg() Cfg {
 	return pipe
 }
 
-// TODO - incomplete helper - make array of maps of hooks
-func maker(hs []hook, hookNames []string) []map[string]hook {
-	N := len(hs)
-	s := make([]map[string]hook, N)
-	if N != len(hookNames) {
-		// maybe throw an err?
-		fmt.Printf("cannot make, incompatible sizes: %d, %d", len(hs), len(hookNames))
-		return nil
-	}
-	m := make(map[string]hook, 1)
-	for i, h := range hs {
-		m[hookNames[i]] = h
-		s[i] = m
-	}
-	return s
-}
-
 func MakeTemplateCfg(out io.Writer) error {
 	var data []byte
 	c := newTemplateCfg()
@@ -137,24 +118,6 @@ func MakeTemplateCfg(out io.Writer) error {
 	}
 	return nil
 }
-
-// flags, options decide which action/pipeline will be ran
-func getPipelines(c Cfg) map[string]Pipeline {
-	return c
-}
-
-// TODO where does the map m comes from?
-// TODO should project be passed here?
-//func makePipe(m []map[string]hook, project string) []executer {
-//	pipe := make([]executer, len(m))
-//	for i, step := range m {
-//		for name, options := range step {
-//			stepic := NewStep(name, options.Name, options.Args, fmt.Sprintf("%q: %s.", name, "SUCCESS"), project)
-//			pipe[i] = stepic
-//		}
-//	}
-//	return pipe
-//}
 
 // print to out - mostly for debugging purposes
 func printCfg(cfg *Cfg, out io.Writer) {

@@ -61,6 +61,11 @@ func TestLoadCfg(t *testing.T) {
 			expErr: ErrConfig,
 			input:  noData,
 		},
+		{
+			name:   "nil input",
+			expErr: ErrConfig,
+			input:  nil,
+		},
 	}
 	for _, tc := range tCases {
 		t.Run(tc.name, func(t *testing.T) {
