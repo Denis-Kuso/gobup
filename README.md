@@ -36,8 +36,9 @@ gobup init <project_dir>
 Creates cfg file in the provided directory named `.gobup.yaml`. Best to provide 
 root of your project.
 
-<details>
-<summary> - Example/default cfg</summary>
+
+<details markdown=1><summary markdown="span">Example cfg</summary>
+
 ```yaml
 # pipeline name
 pre-commit:
@@ -96,8 +97,8 @@ Only run the commands associated with `<pipeline>`, regardles if
 
 ## build
 
-<details>
-<summary>## TODO</summary>
+
+<details markdown=1><summary markdown="span">TODO</summary>
 
 - [ ] add `dry-run` flag
 - [ ] add `ignore-warnings` flag 
