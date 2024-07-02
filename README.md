@@ -1,102 +1,106 @@
-## Workflow 1.0 - command description
+# gobup
 
-### "set and forget" usage: git users
+## What
+
+A configuration-based local pipeline builder (CI-like). Edit a config file, 
+and have different commands execute based on your needs/workflow. 
+
+## Why
+
+Previously used a combination of make files, one-of python/bash scripts to run
+different commands (testing, formating, etc).
+Sometimes made/edited hook files. All of which somewhat cumbersome for maintenance.
+Wanted something that:
+
+- is CLI-based
+- can run independent of IDE/plugins. 
+- can be used easily with git hook files in git
+
+Also, given that, whilst developing, you might not need to adhere to
+the same rules when commiting/pushing to a repo, hence can have a different set of
+commands executed (same goes for different projects).
+
+## Installation
+
+Using go:
+
+`go install github.com/Denis-Kuso/gobup`
+
+or from [releases](github.com/Denis-Kuso/gobup/releases/) page.
+
+## Usage
 
 ```bash
-./gobup init --git .
+gobup init <project_dir>
 ```
+Creates cfg file in the provided directory named `.gobup.yaml`. Best to provide 
+root of your project.
 
-Creates cfg file and creates pre-commit, pre-push files (must be git repo).
-Upon every attempt to commit, commands specified in the cfg file associated
-with the action `pre-commit` will be ran. By default any errors with the
-specified commands will be treated as warnings (error in step 1 does not
-prevent running of step 2). This can be changed with the `-e` flag or modifying
-the option in the cfg file.
-
-Upon every attempt to push, the set of commands associated with `pre-push` will
-run. This action treats all warnings as errors by default (if step 1 fails,
-step 2 will not run).
-
-### Example/default cfg
-
+<details>
+<summary> - Example/default cfg</summary>
 ```yaml
 # pipeline name
 pre-commit:
-  run: true
-  # if possible, all commands run as warnings
-  fail_fast: false
-  # sequence of commands to run in this pipeline
+  run: false
+  # sequence (order matters) of commands to run in this pipeline
   cmds:
     - build:
-        cmdName: go build
-        # args are ordered
+        cmdName: go
+        # args to cmdName (ordered)
         args:
+          - "build"
           - "-o"
           - "binaryName"
     - test:
-        cmdName: go test
+        cmdName: go
         args:
+          - "test"
           - "."
           - "-v"
     - format:
         cmdName: gofmt
         args: ["-l", "."]
-pre-push:
-  run: false
-  # failed command will prevent execution of next command
-  fail_fast: true
+        # output to stdout interpreted/treated as an error
+        stdoutAsErr: true
+#  different pipeline perhaps ran whilst prototyping/developing
+dev:
+  run: true
   cmds:
-    # commands run in specified order (build, test, format, push)
-    - build:
-        cmdName: go build
+    - lint:
+        cmdName: revive 
         args:
-          - "."
-    - test:
-        cmdName: go test
-        args:
-          - "."
-          - "-v"
+          - "-formatter"
+          - "friendly"
+        # stop execution if it takes longer than timeout seconds
+        timeout: 15
     - format:
         cmdName: gofmt
-        # as per YAML specification, can also specify order using brackets
         args: ["-l", "."]
-    - push:
-        cmdName: "git push"
-        args:
-          - "origin"
-          - "main"
-        # will fail if command takes longer than timeout seconds
-        timeout: 5
+        stdoutAsErr: true
 ```
-
-### A bit more manual usage - no git installed
+</details>
 
 ```bash
-./gobup init .
+gobup run
 ```
-Creates cfg file local to project, which may or may not be a git repo.
+
+Runs all actions specified in the cfg file in current directory, which have
+the propery `run: true`. 
 
 ```bash
-./gobup run
-```
-runs all actions specified in the cfg file in current directory, which have
-the propery `run: true`. Invoking this command is not neccessary if
-initialised with `--git` option specified.
-
-```bash
-./gobup run --dry-run
-```
-Prints to stdout all the actions - and hooks that would be ran.
-
-```bash
-./gobup run -e
+gobup run -p <pipeline>
 ```
 
-Runs all actions with warnings treated as errors (if possible).
+Only run the commands associated with `<pipeline>`, regardles if
+`run: false` for that pipeline. Ignores other pipelines.
 
-```bash
-./gobup run -p <pipeline>
-```
+## build
 
-Runs only the commands asociated with the `<action_name>` regardles if
-`run: false` specified in cfg file (acts like a singular overwrite).
+<details>
+<summary>## TODO</summary>
+
+- [ ] add `dry-run` flag
+- [ ] add `ignore-warnings` flag 
+- [ ] make prettier output format
+- [ ] add git hook files compatibility
+</details>
