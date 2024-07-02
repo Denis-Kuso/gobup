@@ -26,9 +26,11 @@ var initCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		project := args[0]
-		fmt.Printf("init called on project %q\n", project)
-		// TODO err HANDLIGN!!!!!
-		createTemplate(project)
+		err := createTemplate(project)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	},
 }
 
