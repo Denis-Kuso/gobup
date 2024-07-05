@@ -58,11 +58,12 @@ var runCmd = &cobra.Command{
 		}
 		koraci := makeExeSteps(steps, fname)
 		for _, korak := range koraci {
-			msg, err := korak.Execute()
+			err := korak.Execute()
 			if err != nil {
+				fmt.Printf(" step: %-10q --> \033[31mFAILURE\033[0m\n", korak.Name)
 				return err
 			}
-			fmt.Print(msg)
+			fmt.Printf(" step: %-10q --> \033[32mSUCCESS\033[0m\n", korak.Name)
 		}
 		return nil
 	},
@@ -97,13 +98,12 @@ func preparePipes(cfg io.Reader, pipeline string) ([]config.Action, error) {
 	return red, nil
 }
 
-func makeExeSteps(pipelines []config.Action, project string) []actions.Executer {
-	var steps []actions.Executer
+func makeExeSteps(pipelines []config.Action, project string) []actions.Step {
+	var steps []actions.Step
 	for _, pipe := range pipelines {
 		s := pipe
 		for name, cmd := range s {
-			msg := fmt.Sprintf(" step: %s -> SUCCESS", name)
-			step := actions.NewTimeoutStep(name, cmd.Name, cmd.Args, msg, project, time.Duration(cmd.Timeout), cmd.IsSpecial)
+			step := actions.NewStep(name, cmd.Name, cmd.Args, project, time.Duration(cmd.Timeout), cmd.IsSpecial)
 			steps = append(steps, step)
 		}
 	}

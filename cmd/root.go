@@ -21,7 +21,8 @@ var rootCmd = &cobra.Command{
 	A pipeline can be ran manually whenever you want. You could add the command
 	you use to run a pipeline into a desired hook file, such as pre-commit.
 	That pipeline will then run every time you try to commit.`,
-	Version: "dev",
+	Version:      "dev",
+	SilenceUsage: true,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
