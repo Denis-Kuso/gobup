@@ -9,6 +9,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	// default values if nothing provided during build/linking phase
+	Version    = "development"
+	CommitHash = "not provided"
+)
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "gobup",
@@ -20,7 +26,7 @@ var rootCmd = &cobra.Command{
 	A pipeline can be ran manually whenever you want. You could add the command
 	you use to run a pipeline into a desired hook file, such as pre-commit.
 	That pipeline will then run every time you try to commit.`,
-	Version:      "dev",
+	Version:      Version,
 	SilenceUsage: true,
 }
 
@@ -34,6 +40,6 @@ func Execute() {
 }
 
 func init() {
-	versionTemplate := fmt.Sprintf("%s - version %q (commitHash)\n", rootCmd.Use, rootCmd.Version)
+	versionTemplate := fmt.Sprintf("%s - version %s (commitHash: %s)\n", rootCmd.Use, Version, CommitHash)
 	rootCmd.SetVersionTemplate(versionTemplate)
 }
