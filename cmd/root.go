@@ -1,6 +1,5 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
+// Package cmd defines the implementations of the root command
+// and the subcommands associated with the gobup tool.
 package cmd
 
 import (

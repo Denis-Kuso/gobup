@@ -1,3 +1,5 @@
+// Package config implements routines for reading/writting the
+// app-specific config file.
 package config
 
 import (
@@ -8,19 +10,29 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// ErrConfig is an error returned when either reading/writting from/to
+// config file encounters an error, e.g. loading a malformed config file.
 var ErrConfig = errors.New("configuration failure")
 
-// read cfg
-// validate Cfg
-// flags handled elsewhere?
-// cfg composed of pipelines/executers
+// Cfg represents the contents of a gobup.yaml config file. This file is a set of
+// pipelines, where a pipeline is associated with a set of executable
+// commands. Empty Cfg makes no sense.
 type Cfg map[string]Pipeline
-type Action map[string]hook
 
+// Pipeline represents a collection of runnable commands, here reffered to
+// as Steps.
+// A pipeline can be set to runnable. If run == false, Pipeline will
+// be skipped when not explictly used as an argument.
 type Pipeline struct {
 	Run   bool     `yaml:"run"`
 	Steps []Action `yaml:"cmds"`
 }
+
+// Action represent a single command with the required
+// properties to run it. The properties are the command's name and optional
+// args, optional timeout (max time to run in seconds) and optional IsSpecial property,
+// such that, a commands output to stdout should be treated as an err (e.g. gofmt).
+type Action map[string]hook
 
 type hook struct {
 	Name      string   `yaml:"cmdName"`
@@ -29,7 +41,8 @@ type hook struct {
 	Timeout   uint     `yaml:"timeout,omitempty"`
 }
 
-// read config file
+// LoadCfg reads from in (gobup.yaml file). Empty or improperly
+// structured data will return a ErrConfig error.
 func LoadCfg(in io.Reader) (Cfg, error) {
 	var buf []byte
 	c := Cfg{}
@@ -53,7 +66,7 @@ func LoadCfg(in io.Reader) (Cfg, error) {
 	return c, nil
 }
 
-// enables writing cfg structure to a file
+// creates default cfg structure
 func newTemplateCfg() Cfg {
 	// TODO this function can be refactored (break up)
 	const numOfPipes = 2
@@ -82,7 +95,6 @@ func newTemplateCfg() Cfg {
 	m["build"] = build
 	m0["test"] = test
 	m2["format"] = format
-	//var s []map[string]hook
 	var s []Action
 	var s1 []Action
 	s1 = append(s1, m, m0, m2)
@@ -102,6 +114,8 @@ func newTemplateCfg() Cfg {
 	return pipe
 }
 
+// MakeTemplateCfg writes the default structure of gobup.yaml to out (normally
+// disk/file).
 func MakeTemplateCfg(out io.Writer) error {
 	var data []byte
 	c := newTemplateCfg()

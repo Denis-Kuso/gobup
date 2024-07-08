@@ -1,3 +1,5 @@
+// Package actions defines the Step type and its error along with the Execute
+// method. Together, these enable enviroment setup for the step to execute in.
 package actions
 
 import (
@@ -8,6 +10,8 @@ import (
 	"time"
 )
 
+// Step represents information neccessary to prepare an enviroment for an
+// executable command (e.g. gofmt, go build) to run
 type Step struct {
 	Name string
 	// command used to run the step
@@ -18,6 +22,8 @@ type Step struct {
 	stdoutAsErr bool
 }
 
+// StepErr represent an error type caused by a Step, containing information
+// about its cause.
 type StepErr struct {
 	// which CI step caused the error
 	step  string
@@ -32,6 +38,7 @@ func (s *StepErr) Error() string {
 	return fmt.Sprintf("step: %q\n %scause: %s", s.step, s.msg, s.cause)
 }
 
+// Is returns true if any of target's type in its error chain equals to StepErr
 func (s *StepErr) Is(target error) bool {
 	t, ok := target.(*StepErr)
 	if !ok {
@@ -44,7 +51,11 @@ func (s *StepErr) Unwrap() error {
 	return s.cause
 }
 
+// NewStep creates a new Step with provided arguments. Step is used primarily,
+// to set up the environment for a command to execute. If timeout t is provided
+// as t <= 0, default value of 30s is used.
 func NewStep(stepName, exe string, args []string, proj string, timeout time.Duration, stdoutAsErr bool) Step {
+	// arbitrary choice of 30s, most commands used complete well below 30s
 	const defaultTimeout time.Duration = 30
 	t := Step{
 		Name:        stepName,
@@ -63,6 +74,11 @@ func NewStep(stepName, exe string, args []string, proj string, timeout time.Dura
 	return t
 }
 
+// Execute executes the cmd associated with step s. On success it return nil.
+// Returns an error:
+// - if default or provided timeout exceeded
+// - if s.stdoutAsErr is true and command wrote to stdout
+// - the cmd executes unsuccessfuly
 func (s Step) Execute() error {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
