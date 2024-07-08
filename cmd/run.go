@@ -31,7 +31,7 @@ var runCmd = &cobra.Command{
 		} else {
 			project = args[0]
 		}
-		fname, err := filepath.Abs(project)
+		projectPath, err := filepath.Abs(project)
 		if err != nil {
 			return fmt.Errorf("%w: project: %s: %v", ErrValidation, project, err)
 		}
@@ -39,30 +39,13 @@ var runCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("%w: %v: %q", ErrValidation, err, pipeline)
 		}
-		// ####### args preparation
 		cfg, err := os.Open(cfgName)
 		defer cfg.Close()
 		if err != nil {
-			return fmt.Errorf("cannot open config file: %v", err)
+			return fmt.Errorf("%w: cannot open config file: %v", ErrValidation, err)
 		}
-		steps, err := preparePipes(cfg, pipeline)
-		if err != nil {
-			return fmt.Errorf("%v", err)
-		}
-		// any pipelines to run?
-		if len(steps) == 0 {
-			return fmt.Errorf("nothing to run. Are run fields of your all your pipelines set to false?")
-		}
-		koraci := makeExeSteps(steps, fname)
-		for _, korak := range koraci {
-			err := korak.Execute()
-			if err != nil {
-				fmt.Printf(" step: %-10q --> \033[31mFAILURE\033[0m\n", korak.Name)
-				return err
-			}
-			fmt.Printf(" step: %-10q --> \033[32mSUCCESS\033[0m\n", korak.Name)
-		}
-		return nil
+		// ####### args preparation complete
+		return runPipelines(projectPath, pipeline, cfg, os.Stdout)
 	},
 }
 
@@ -105,4 +88,25 @@ func makeExeSteps(pipelines []config.Action, project string) []actions.Step {
 		}
 	}
 	return steps
+}
+
+func runPipelines(project, pipeline string, in io.Reader, out io.Writer) error {
+	steps, err := preparePipes(in, pipeline)
+	if err != nil {
+		return err
+	}
+	// any pipelines to run?
+	if len(steps) == 0 {
+		return fmt.Errorf("nothing to run. Are \"run\" fields of all pipelines set to false?")
+	}
+	koraci := makeExeSteps(steps, project)
+	for _, korak := range koraci {
+		err := korak.Execute()
+		if err != nil {
+			fmt.Fprintf(out, " step: %-10q --> \033[31mFAILURE\033[0m\n", korak.Name)
+			return err
+		}
+		fmt.Fprintf(out, " step: %-10q --> \033[32mSUCCESS\033[0m\n", korak.Name)
+	}
+	return nil
 }
