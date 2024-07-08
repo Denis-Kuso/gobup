@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -13,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// default name for the config file
 const (
 	cfgName = ".gobup.yaml"
 )
@@ -24,7 +22,7 @@ var initCmd = &cobra.Command{
 	Long:    `Creates config file named .gobup.yaml in provided directory.`,
 	Example: " - create config in current dir\n   gobup init .",
 	Args:    cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 		project := args[0]
 		err := createTemplate(project)
 		if err != nil {
@@ -54,7 +52,8 @@ func writeCmd(cmd []byte, out io.Writer) error {
 
 // createTemplate writes template cfg to location of project
 // if project not a valid pathname or file with default cfg name
-// exists it returns an error
+// exists it returns an error. It will not try to overwrite an existing config
+// file.
 func createTemplate(project string) error {
 	// make/check valid path
 	fname, err := filepath.Abs(filepath.Join(project, cfgName))

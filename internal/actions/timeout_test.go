@@ -2,7 +2,6 @@ package actions
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"time"
@@ -102,8 +101,8 @@ func TestRun(t *testing.T) {
 	for _, tc := range tCases {
 		t.Run(tc.name, func(t *testing.T) {
 			//	var out bytes.Buffer
-			s := NewTimeoutStep(tc.stepName, tc.cmd, tc.args, "SUCCESS", tc.project, tc.timeout, tc.special)
-			msg, gotErr := s.Execute()
+			s := NewStep(tc.stepName, tc.cmd, tc.args, tc.project, tc.timeout, tc.special)
+			gotErr := s.Execute()
 			if tc.expErr != nil {
 				if gotErr == nil {
 					t.Errorf("Expected error: %q. Got nil instead", tc.expErr)
@@ -118,7 +117,6 @@ func TestRun(t *testing.T) {
 				t.Errorf("Expected no error, got: %q", gotErr)
 				return
 			}
-			fmt.Printf("got msg: %s\n", msg)
 		})
 	}
 }

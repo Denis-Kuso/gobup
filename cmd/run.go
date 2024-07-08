@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -58,11 +55,12 @@ var runCmd = &cobra.Command{
 		}
 		koraci := makeExeSteps(steps, fname)
 		for _, korak := range koraci {
-			msg, err := korak.Execute()
+			err := korak.Execute()
 			if err != nil {
+				fmt.Printf(" step: %-10q --> \033[31mFAILURE\033[0m\n", korak.Name)
 				return err
 			}
-			fmt.Print(msg)
+			fmt.Printf(" step: %-10q --> \033[32mSUCCESS\033[0m\n", korak.Name)
 		}
 		return nil
 	},
@@ -70,10 +68,6 @@ var runCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	runCmd.Flags().StringP(pipelineArg, "p", "", "specific pipeline (e.g. \"pre-commit\") defined in your .gobup.yaml")
 }
 
@@ -101,15 +95,12 @@ func preparePipes(cfg io.Reader, pipeline string) ([]config.Action, error) {
 	return red, nil
 }
 
-// perhaps, once/if the pipeline options are irelevant, return/operate on
-// "steps" instead...
-func makeExeSteps(pipelines []config.Action, project string) []actions.Executer {
-	var steps []actions.Executer
+func makeExeSteps(pipelines []config.Action, project string) []actions.Step {
+	var steps []actions.Step
 	for _, pipe := range pipelines {
 		s := pipe
 		for name, cmd := range s {
-			msg := fmt.Sprintf(" step: %s -> SUCCESS", name)
-			step := actions.NewTimeoutStep(name, cmd.Name, cmd.Args, msg, project, time.Duration(cmd.Timeout), cmd.IsSpecial)
+			step := actions.NewStep(name, cmd.Name, cmd.Args, project, time.Duration(cmd.Timeout), cmd.IsSpecial)
 			steps = append(steps, step)
 		}
 	}

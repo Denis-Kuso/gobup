@@ -1,9 +1,7 @@
 package cmd
 
-import (
-	"errors"
-)
+import "errors"
 
-var (
-	ErrValidation = errors.New("validation failure")
-)
+// ErrValidation is an error value associated with the correct state of
+// provided arguments and/or usage of the gobup cmd.
+var ErrValidation = errors.New("validation failure")
