@@ -16,9 +16,9 @@ Wanted something that:
 - can run independent of IDE/plugins.
 - can be used easily with git hook files in git
 
-Also, given that, whilst developing, you might not need to adhere to
-the same rules when commiting/pushing to a repo, hence can have a different set of
-commands executed (same goes for different projects).
+Also, whilst developing, you might not need to adhere to
+the same rules when commiting/pushing to a repo, hence can have a different set
+of commands executed or in different order (same goes for different projects).
 
 ## Installation
 
